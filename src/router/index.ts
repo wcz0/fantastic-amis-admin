@@ -4,7 +4,12 @@ import { useNProgress } from '@vueuse/integrations/useNProgress'
 import '@/assets/styles/nprogress.scss'
 
 // 路由相关数据
-import { asyncRoutes, asyncRoutesByFilesystem, constantRoutes, constantRoutesByFilesystem } from './routes'
+import {
+  asyncRoutes,
+  asyncRoutesByFilesystem,
+  constantRoutes,
+  constantRoutesByFilesystem,
+} from './routes'
 import pinia from '@/store'
 import useSettingsStore from '@/store/modules/settings'
 import useKeepAliveStore from '@/store/modules/keepAlive'
@@ -16,7 +21,10 @@ const { isLoading } = useNProgress()
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes: useSettingsStore(pinia).settings.app.routeBaseOn === 'filesystem' ? constantRoutesByFilesystem : constantRoutes as RouteRecordRaw[],
+  routes:
+    useSettingsStore(pinia).settings.app.routeBaseOn === 'filesystem'
+      ? constantRoutesByFilesystem
+      : (constantRoutes as RouteRecordRaw[]),
 })
 
 router.beforeEach(async (to, from, next) => {
@@ -30,7 +38,8 @@ router.beforeEach(async (to, from, next) => {
     // 是否已根据权限动态生成并注册路由
     if (routeStore.isGenerate) {
       // 导航栏如果不是 single 模式，则需要根据 path 定位主导航的选中状态
-      settingsStore.settings.menu.menuMode !== 'single' && menuStore.setActived(to.path)
+      settingsStore.settings.menu.menuMode !== 'single'
+      && menuStore.setActived(to.path)
       // 如果已登录状态下，进入登录页会强制跳转到主页
       if (to.name === 'login') {
         next({
@@ -39,7 +48,10 @@ router.beforeEach(async (to, from, next) => {
         })
       }
       // 如果未开启主页，但进入的是主页，则会进入侧边栏导航第一个模块
-      else if (!settingsStore.settings.home.enable && to.fullPath === settingsStore.settings.home.fullPath) {
+      else if (
+        !settingsStore.settings.home.enable
+        && to.fullPath === settingsStore.settings.home.fullPath
+      ) {
         if (menuStore.sidebarMenus.length > 0) {
           next({
             path: menuStore.sidebarMenusFirstDeepestPath,
@@ -105,7 +117,10 @@ router.beforeEach(async (to, from, next) => {
       next({
         name: 'login',
         query: {
-          redirect: to.fullPath !== settingsStore.settings.home.fullPath ? to.fullPath : undefined,
+          redirect:
+            to.fullPath !== settingsStore.settings.home.fullPath
+              ? to.fullPath
+              : undefined,
         },
       })
     }
@@ -121,7 +136,9 @@ router.afterEach((to, from) => {
   settingsStore.settings.app.enableProgress && (isLoading.value = false)
   // 设置页面 title
   if (settingsStore.settings.app.routeBaseOn !== 'filesystem') {
-    settingsStore.setTitle(to.meta.breadcrumbNeste?.at(-1)?.title ?? to.meta.title)
+    settingsStore.setTitle(
+      to.meta.breadcrumbNeste?.at(-1)?.title ?? to.meta.title,
+    )
   }
   else {
     settingsStore.setTitle(to.meta.title)
